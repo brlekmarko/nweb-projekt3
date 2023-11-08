@@ -18,10 +18,10 @@
                 this.trajectoryY = trajectoryY; // smjerovi kretanja po X i Y osi
                 this.speed = speed;
             }
-            draw(canvas_context){
+            draw(canvas_context, asteroidImg){
                 // crta kvadrat na canvasu
                 canvas_context.beginPath();
-                canvas_context.rect(this.x, this.y, this.size, this.size);
+                canvas_context.drawImage(asteroidImg, this.x, this.y, this.size, this.size);
                 canvas_context.fillStyle = "gray";
                 canvas_context.fill();
                 canvas_context.stroke();
@@ -149,10 +149,10 @@
             return newAsteroids;
         }
 
-        function drawAsteroids(asteroids, context){
+        function drawAsteroids(asteroids, context, asteroidImg){
             // crta sve asteroide iz liste
             for(let i = 0; i < asteroids.length; i++){
-                asteroids[i].draw(context);
+                asteroids[i].draw(context, asteroidImg);
             }
 
         }
@@ -212,14 +212,25 @@
             context.shadowColor = "black";
         }
 
-        function main(){ // glavna funkcija, pokrece igru
+        async function loadImages(){
+            // ucitamo slike
+            let asteroidImg = new Image();
+            asteroidImg.src = "resources/asteroid.png";
+            return asteroidImg;
+        }
+
+        async function main(){ // glavna funkcija, pokrece igru
 
             // ucitamo zvuk za koliziju
-            let collision_audio = new Audio("collision.mp3");
+            let collision_audio = new Audio("resources/collision.mp3");
             collision_audio.volume = 0.4;
+
+            let asteroidImg = await loadImages();
 
             let my_canvas = document.getElementById("my_canvas");
             let my_context = my_canvas.getContext("2d");
+
+            my_canvas.style.backgroundImage = "url('resources/background.jpg')";
             updateCanvasSize(my_canvas, my_context);
 
             // nacrtamo igraca u sredini canvasa
@@ -271,7 +282,7 @@
                 for(let i = 0; i < asteroids.length; i++){
                     asteroids[i].move(my_canvas, asteroids);
                 }
-                drawAsteroids(asteroids, my_context);
+                drawAsteroids(asteroids, my_context, asteroidImg);
 
                 my_context.shadowBlur = 0; // maknemo sjenu za ispis tekstova
                 // kasnije ce se automatski vratiti zbog updateCanvasSize
