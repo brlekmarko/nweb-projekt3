@@ -120,7 +120,12 @@
                 let asteroidTrajectoryX = Math.random()*2 - 1 // smjer asteroida po X osi, izmedu -1 i 1
                 let asteroidTrajectoryY = Math.random()*2 - 1 // smjer asteroida po Y osi, izmedu -1 i 1
                 // brzina asteroida
-                let asteroidSpeed = Math.floor(Math.random() * 15) + 5; // brzina asteroida je izmedu 5 i 20
+                let asteroidSpeed = Math.floor(Math.random() * 15) + 5; // brzina asteroida je izmedu 10 i 20
+                // smanji brzinu asteroida ako je velik
+                asteroidSpeed -= asteroidSize/20;
+                if(asteroidSpeed < 8){
+                    asteroidSpeed = 8;
+                }
                 // pocetna pozicija asteroida, treba biti izvan canvasa
                 let asteroidX = 0;
                 let asteroidY = 0;
@@ -271,11 +276,11 @@
                     // spremimo vrijeme ako je bolje od najboljeg
                     saveBestTime(startTime, Date.now());
                     // prikazemo poruku, ponudimo ponovnu igru
-                    my_context.font = "30px Arial";
+                    my_context.font = "40px Arial";
                     my_context.fillStyle = "red";
                     my_context.textAlign = "center";
                     my_context.fillText("Game Over", my_canvas.width/2, my_canvas.height/2);
-                    my_context.font = "20px Arial";
+                    my_context.font = "30px Arial";
                     my_context.fillText("Press R to restart", my_canvas.width/2, my_canvas.height/2 + 50);
                     document.addEventListener("keydown", restartGameListener);
                 }
