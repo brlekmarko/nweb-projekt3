@@ -214,6 +214,10 @@
 
         function main(){ // glavna funkcija, pokrece igru
 
+            // ucitamo zvuk za koliziju
+            let collision_audio = new Audio("collision.mp3");
+            collision_audio.volume = 0.4;
+
             let my_canvas = document.getElementById("my_canvas");
             let my_context = my_canvas.getContext("2d");
             updateCanvasSize(my_canvas, my_context);
@@ -277,6 +281,8 @@
 
                 // provjerimo koliziju
                 if(player.checkCollision(asteroids)){
+                    // igrac je udario u asteroid
+                    collision_audio.play();
                     clearInterval(gameLoop);
                     clearInterval(asteroidInterval);
                     // spremimo vrijeme ako je bolje od najboljeg
