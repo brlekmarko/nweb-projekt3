@@ -204,16 +204,19 @@
             context.fillText("Vrijeme: " + minutes + ":" + seconds + "." + milliseconds, canvas.width - 20, 50);
         }
 
+        function updateCanvasSize(canvas, context){
+            // postavi velicinu canvasa na velicinu prozora
+            canvas.width = window.innerWidth * 0.95;
+            canvas.height = window.innerHeight * 0.95;
+            context.shadowBlur = 10;
+            context.shadowColor = "black";
+        }
+
         function main(){ // glavna funkcija, pokrece igru
 
             let my_canvas = document.getElementById("my_canvas");
             let my_context = my_canvas.getContext("2d");
-
-            my_canvas.width = window.innerWidth * 0.95;
-            my_canvas.height = window.innerHeight * 0.95;
-
-            my_context.shadowBlur = 20;
-            my_context.shadowColor = "black";
+            updateCanvasSize(my_canvas, my_context);
 
             // nacrtamo igraca u sredini canvasa
             let playerSize = 50;
@@ -252,8 +255,8 @@
             // pokrecemo petlju za igru
             let gameLoop = setInterval(function(){
 
-                my_canvas.width = window.innerWidth * 0.95;
-                my_canvas.height = window.innerHeight * 0.95;
+                updateCanvasSize(my_canvas, my_context); //ako je korisnik smanjio prozor, smanjimo i canvas
+
                 // ocistimo canvas
                 my_context.clearRect(0, 0, my_canvas.width, my_canvas.height);
 
@@ -265,6 +268,9 @@
                     asteroids[i].move(my_canvas, asteroids);
                 }
                 drawAsteroids(asteroids, my_context);
+
+                my_context.shadowBlur = 0; // maknemo sjenu za ispis tekstova
+                // kasnije ce se automatski vratiti zbog updateCanvasSize
 
                 // ispisemo vrijeme
                 updateTime(my_canvas, my_context, startTime, bestTimeFormatted);
