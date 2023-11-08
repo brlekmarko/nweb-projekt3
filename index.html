@@ -68,26 +68,39 @@
                 this.size = size;
                 this.speed = speed;
             }
-            draw(canvas_context){
+            draw(canvas_context, spaceshipImg){
                 // crta kvadrat na canvasu
                 canvas_context.beginPath();
-                canvas_context.rect(this.x, this.y, this.size, this.size);
+                canvas_context.drawImage(spaceshipImg, this.x, this.y, this.size, this.size);
                 canvas_context.fillStyle = "red";
                 canvas_context.fill();
             }
-            move(pressedKeys){
+            move(pressedKeys, canvas){
                 // pomice igraca po canvasu
                 if("ArrowUp" in pressedKeys){
                     this.y -= this.speed;
+                    // provjera je li igrac izvan canvasa
+                    if(this.y < 0){
+                        this.y = 0;
+                    }
                 }
                 if("ArrowDown" in pressedKeys){
                     this.y += this.speed;
+                    if(this.y > canvas.height - this.size){
+                        this.y = canvas.height - this.size;
+                    }
                 }
                 if("ArrowLeft" in pressedKeys){
                     this.x -= this.speed;
+                    if(this.x < 0){
+                        this.x = 0;
+                    }
                 }
                 if("ArrowRight" in pressedKeys){
                     this.x += this.speed;
+                    if(this.x > canvas.width - this.size){
+                        this.x = canvas.width - this.size;
+                    }
                 }
             }
 
@@ -115,7 +128,7 @@
             for(let i = 0; i < numberOfAsteroids; i++){
                 // generira asteroid sa nasumicnim parametrima (velicina, smjer, brzina, pocetna pozicija)
                 // velicina asteroida
-                let asteroidSize = Math.floor(Math.random() * 190) + 10; // velicina asteroida je izmedu 10 i 200
+                let asteroidSize = Math.floor(Math.random() * 150) + 50; // velicina asteroida je izmedu 50 i 200
                 // smjer asteroida
                 let asteroidTrajectoryX = Math.random()*2 - 1 // smjer asteroida po X osi, izmedu -1 i 1
                 let asteroidTrajectoryY = Math.random()*2 - 1 // smjer asteroida po Y osi, izmedu -1 i 1
@@ -216,11 +229,24 @@
             context.shadowColor = "black";
         }
 
-        async function loadImages(){
+        async function loadAsteroidImage(){
             // ucitamo slike
             let asteroidImg = new Image();
             asteroidImg.src = "resources/asteroid.png";
-            return asteroidImg;
+            return new Promise((resolve, reject) => {
+                asteroidImg.onload = () => resolve(asteroidImg);
+                asteroidImg.onerror = reject;
+            });
+        }
+
+        async function loadSpaceshipImage(){
+            // ucitamo slike
+            let spaceshipImg = new Image();
+            spaceshipImg.src = "resources/spaceship.png";
+            return new Promise((resolve, reject) => {
+                spaceshipImg.onload = () => resolve(spaceshipImg);
+                spaceshipImg.onerror = reject;
+            });
         }
 
         async function main(){ // glavna funkcija, pokrece igru
@@ -229,7 +255,9 @@
             let collision_audio = new Audio("resources/collision.mp3");
             collision_audio.volume = 0.4;
 
-            let asteroidImg = await loadImages();
+            // ucitamo slike asteroida i igraca
+            let asteroidImg = await loadAsteroidImage();
+            let spaceshipImg = await loadSpaceshipImage();
 
             let my_canvas = document.getElementById("my_canvas");
             let my_context = my_canvas.getContext("2d");
@@ -238,10 +266,10 @@
             updateCanvasSize(my_canvas, my_context);
 
             // nacrtamo igraca u sredini canvasa
-            let playerSize = 50;
+            let playerSize = 75;
             let playerSpeed = 10;
             let player = new Player((my_canvas.width - playerSize)/2 , (my_canvas.height - playerSize)/2, playerSize, playerSpeed);
-            player.draw(my_context);
+            player.draw(my_context, spaceshipImg);
             
             // asteroidi
             let asteroids = [];
@@ -279,9 +307,12 @@
                 // ocistimo canvas
                 my_context.clearRect(0, 0, my_canvas.width, my_canvas.height);
 
+                // ispisemo vrijeme
+                updateTime(my_canvas, my_context, startTime, bestTimeFormatted);
+
                 // pomaknemo igraca
-                player.move(pressedKeys);
-                player.draw(my_context);
+                player.move(pressedKeys, my_canvas);
+                player.draw(my_context, spaceshipImg);
                 // pomaknemo asteroide
                 for(let i = 0; i < asteroids.length; i++){
                     asteroids[i].move(my_canvas, asteroids);
@@ -290,9 +321,6 @@
 
                 my_context.shadowBlur = 0; // maknemo sjenu za ispis tekstova
                 // kasnije ce se automatski vratiti zbog updateCanvasSize
-
-                // ispisemo vrijeme
-                updateTime(my_canvas, my_context, startTime, bestTimeFormatted);
 
                 // provjerimo koliziju
                 if(player.checkCollision(asteroids)){
